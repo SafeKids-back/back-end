@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: root
+    username: root
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/userdb
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  flyway:
+    enabled: false
+  config:
+    import: configserver:http://localhost:8090
