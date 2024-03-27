@@ -1,19 +1,25 @@
-version: '3.1'
+version: '3'
 services:
   mysqldb:
     container_name: mysqldb
     image: mysql:8.1.0
+    ports:
+      - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: userdb
-      MYSQL_PASSWORD: root
-    networks:
-      rsf:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=userdb
+      - MYSQL_PASSWORD=user
+      - MYSQL_USER=user
 
   user-service:
     container_name: user-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/userdb
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8090
+      SPRING_FLYWAY_URL: jdbc:mysql://mysqldb:3306/userdb
+      FLYWAY_USER: user
+      FLYWAY_PASSWORD: user
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -23,11 +29,11 @@ services:
       - mysqldb
       - config-server
       - eureka-server
-    networks:
-      rsf:
 
   config-server:
     container_name: config-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
     build:
       context: ./config-server
       dockerfile: Dockerfile
@@ -35,8 +41,6 @@ services:
       - "8090:8090"
     depends_on:
       - eureka-server
-    networks:
-      rsf:
 
   eureka-server:
     container_name: eureka-server
@@ -45,8 +49,3 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8761:8761"
-    networks:
-      rsf:
-
-networks:
-  rsf:
